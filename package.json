@@ -1,0 +1,24 @@
+{
+	"name": "repl-devtools",
+	"version": "1.0.0",
+	"description": "Virtual REPL one can interact with via DevTools protocol",
+	"main": "repl-devtools.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://archive.voodoowarez.com/repl-devtools"
+	},
+	"keywords": [],
+	"author": "rektide",
+	"license": "X11",
+	"module": "repl-devtools.js",
+	"dependencies": {
+		"@std/esm": "^0.18.0",
+		"ws": "^3.3.3"
+	},
+	"devDependencies": {
+		"chrome-debugging-client": "^0.4.5"
+	}
+}
