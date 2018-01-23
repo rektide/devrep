@@ -7,7 +7,7 @@ var executionContext= 1
 /**
 * Each target is a single vm, or in CDP parlance, a executionContext
 */
-class Target{
+export class Target{
 	constructor( opts){
 		Object.assign( this, opts)
 		this._console= new EventEmitter()
@@ -37,8 +37,8 @@ class Target{
 		this._vm= Vm.createContext({
 			console: {
 				// there is quite a lot more console.* to go but here's a start
-				log: (...args)=> this._console.emit( "log", log( "log", args))
-				info: (...args)=> this._console.emit( "log", log( "info", args))
+				log: (...args)=> this._console.emit( "log", log( "log", args)),
+				info: (...args)=> this._console.emit( "log", log( "info", args)),
 				error: (...args)=> this._console.emit( "log", log( "error", args))
 			}
 		})
@@ -84,5 +84,4 @@ class Target{
 		return current
 	}
 }
-
-
+export default Target

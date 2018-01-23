@@ -14,7 +14,7 @@ export class Connection{
 	onconsole(){
 	}
 	onmessage( msg){
-		msg= JSON.parse(msg)
+		msg= JSON.parse( msg)
 		var
 		  id= msg.id,
 		  params= msg.params|| {},
@@ -24,7 +24,7 @@ export class Connection{
 		  result= {},
 		  reply= {id, result}
 
-		if( domain=== "Log"){
+		messageSwitch: if( domain=== "Log"){
 			if( call=== "clear"){
 			}
 		}else if( domain=== "Page"){
@@ -47,7 +47,7 @@ export class Connection{
 			}
 		}else if( domain=== "Runtime"){
 			if( call=== "enable"&& !this._enabled.Runtime){
-				conn.send({
+				this.conn.send({
 					method: "Runtime.executionContextCreated",
 					params: {
 						context: {
@@ -63,17 +63,16 @@ export class Connection{
 				})
 			}else if( call=== "evaluate"){
 				if( params.contextId!== this._target._executionContext){
-					break
+					break messageSwitch;
 				}
 
 				// For now run the code but don't really return the result correctly:
 				// 1. we need to save the result by an id we can lookup again- the initial view is just a "preview"
 				// 2. theres a sizable complexity to how types seem to be marshalled- strings, objects, numbers, Promises, &c
-
 				var
-				  r1= Vm.runInContext( params.expression, this._target._Vm),
-				  r2= Object.keys( r1).map( name=> {name, type: "Object", value: "Object"}) // "it's complicated", much todo
-				var 
+				  r1= Vm.runInContext( params.expression, this._target._vm),
+				  namer= name=> ({ name, type: "Object", value: "Object"}),
+				  r2 = Object.keys( r1).map( namer) // "it's complicated", much todo
 				result.result= {
 					className: "Object",
 					description: "Object",
@@ -93,7 +92,7 @@ export class Connection{
 			}
 		}else if( domain=== "Target"){
 			if( call=== "setDiscoverTargets"&& params.discover=== true){
-				conn.send({
+				this.conn.send({
 					method: "Target.targetCreated",
 					params: {
 						targetInfo: {
@@ -109,10 +108,12 @@ export class Connection{
 		}
 
 		// before we go mark that we've enabled or disabled appropriate bits
-		if( call=== "enable"|| call=== "disable")
+		if( call=== "enable"|| call=== "disable"){
 			this._enable[ domain]= call=== "enable"
 		}
 
-		conn.send( reply)
+		//console.log({ reply})
+		this.conn.send( reply)
 	}
 }
+export default Connection

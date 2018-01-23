@@ -1,7 +1,7 @@
 {
-	"name": "repl-devtools",
+	"name": "devrep",
 	"version": "1.0.0",
-	"description": "Virtual REPL one can interact with via DevTools protocol",
+	"description": "Virtual REPL one can interact with remotely via DevTools protocol",
 	"main": "repl-devtools.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
@@ -20,5 +20,11 @@
 	},
 	"devDependencies": {
 		"chrome-debugging-client": "^0.4.5"
+	},
+	"@std/esm": {
+		"esm": "js",
+		"cjs": {
+			"namedExports": true
+		}
 	}
 }
