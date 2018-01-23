@@ -45,6 +45,7 @@ export class Target{
 		this._ws = new Map() // maps websockets to Connections
 		this._executionContext= (opts&& !isNaN(opts.executionContext)&& ++opts.executionContext)|| ++executionContext
 		delete this.executionContext
+		this.addConnection= this.addConnection.bind( this)
 		this.removeConnection= this.removeConnection.bind( this)
 	}
 
@@ -52,7 +53,7 @@ export class Target{
 	* Attach any incoming websocket connections to the vm
 	*/
 	addWss( wss){
-		wss.on( "connection", conn=> this.addConnection( conn))
+		wss.on( "connection", this.addConnection)
 		// unsub
 		return ()=> wss.clients.forEach( this.removeConnection)
 	}
@@ -60,7 +61,7 @@ export class Target{
 	* Begin a new session 
 	*/
 	addConnection( conn){
-		var existing= this._ws.get( ws)
+		var existing= this._ws.get( conn)
 		if( !existing){
 			var c= new Connection( conn, this)
 			// bind it

@@ -7,9 +7,12 @@ export class Connection{
 	constructor( conn, target){
 		this._target= target
 		this._conn= conn
-		this._enabled= {} // start with no features enabled
+		this._enable= {} // start with no features enabled
 		this.onmessage= this.onmessage.bind( this)
 		this.onconsole= this.onconsole.bind( this)
+	}
+	send( o){
+		this._conn.send( JSON.stringify( o))
 	}
 	onconsole(){
 	}
@@ -46,8 +49,8 @@ export class Connection{
 				}
 			}
 		}else if( domain=== "Runtime"){
-			if( call=== "enable"&& !this._enabled.Runtime){
-				this.conn.send({
+			if( call=== "enable"&& !this._enable.Runtime){
+				this.send({
 					method: "Runtime.executionContextCreated",
 					params: {
 						context: {
@@ -92,7 +95,7 @@ export class Connection{
 			}
 		}else if( domain=== "Target"){
 			if( call=== "setDiscoverTargets"&& params.discover=== true){
-				this.conn.send({
+				this.send({
 					method: "Target.targetCreated",
 					params: {
 						targetInfo: {
@@ -112,8 +115,8 @@ export class Connection{
 			this._enable[ domain]= call=== "enable"
 		}
 
-		//console.log({ reply})
-		this.conn.send( reply)
+		console.log({ reply})
+		this.send( reply)
 	}
 }
 export default Connection
