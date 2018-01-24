@@ -41,23 +41,32 @@ export class RemoteObject{
 	}
 	preview( obj){
 	}
+	static get subtype( o){
+		
+	}
 	// see: https://github.com/ChromeDevTools/devtools-protocol/blob/38926f7f2cf1d2c4fb763b9729862434dd8004ea/json/js_protocol.json#L1794
 	result( obj){
 		obj= obj|| this._obj
 		if( obj=== false|| obj=== true){
 			return {
-				type: "boolean",
-				value: obj
+				result: {
+					type: "boolean",
+					value: obj
+				}
 			}
 		}else if( obj=== undefined){
 			return {
-				type: "undefined"
+				result: {
+					type: "undefined"
+				}
 			}
 		}else if( obj=== null){
 			return {
-				subtype: "null",
-				type: "object",
-				value: null
+				result: {
+					subtype: "null",
+					type: "object",
+					value: null
+				}
 			}
 		}else if( obj instanceof Array){
 			var
@@ -68,17 +77,19 @@ export class RemoteObject{
 				properties[ i]= this.preview( obj[ i])
 			}
 			return {
-				className: "Array",
-				description,
-				objectId: this._objectId,
-				subtype: "array",
-				type: "object",
-				preview: {
+				result: {
+					className: "Array",
 					description,
-					overflow,
-					properties,
+					objectId: this._objectId,
 					subtype: "array",
-					type: "object"
+					type: "object",
+					preview: {
+						description,
+						overflow,
+						properties,
+						subtype: "array",
+						type: "object"
+					}
 				}
 			}
 		}else if( obj instanceof Object){
@@ -88,40 +99,52 @@ export class RemoteObject{
 			  properties= new Array(),
 			  subtype= obj.then? "promise": "object"
 			return {
-				className,
-				descriptioni: className,
-				objectId: this._objectId,
-				preview: {
-					description,
-					overflow,
-					properties,
+				result: {
+					className,
+					descriptioni: className,
+					objectId: this._objectId,
+					preview: {
+						description,
+						overflow,
+						properties,
+						subtype,
+						type: "object"
+					},
 					subtype,
-					type: "object"
-				},
-				subtype,
-				type
+					type
+				}
 			}
 		}else if( obj instanceof Function){
-			
+			return {
+				internalProperties: [],
+				result: {
+				}
+			}
 		}
 
 		var objType= typeof( obj)
 		if( objType=== "string"){
 			return {
-				type: "string",
-				value: obj
+				result: {
+					type: "string",
+					value: obj
+				}
 			}
 		}else if( objType=== "number"{
 			return {
-				description: obj.toString(),
-				type: "number",
-				value: obj
+				result: {
+					description: obj.toString(),
+					type: "number",
+					value: obj
+				}
 			}
 		}else if( objType=== "symbol"{
 			return {
-				description: obj.toString(),
-				objectId: this._objectId,
-				type: "symbol"
+				result: {
+					description: obj.toString(),
+					objectId: this._objectId,
+					type: "symbol"
+				}
 			}
 		}
 	}

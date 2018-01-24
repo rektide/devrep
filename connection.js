@@ -115,7 +115,7 @@ export class Connection{
 			this._enable[ domain]= call=== "enable"
 		}
 
-		console.log({ reply})
+		//console.log({ reply})
 		this.send( reply)
 	}
 }
