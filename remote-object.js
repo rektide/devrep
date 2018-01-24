@@ -32,27 +32,27 @@ export var defaults= {
 	}
 } 
 
-export class Thing{
-	constructor( thing, opts= defaults){
-		this._thing= thing
+export class RemoteObject{
+	constructor( obj, opts= defaults){
+		this._obj= obj
 		this._objectId= opts.objectId()
 		this._injectedScriptId= opts.injectedScriptId|| 1
 		this._overflow= 99
 	}
-	preview( thing){
+	preview( obj){
 	}
-	result( thing){
-		thing= thing|| this._thing
-		if( thing=== false|| thing=== true){
+	result( obj){
+		obj= obj|| this._obj
+		if( obj=== false|| obj=== true){
 			return {
 				type: "boolean",
-				value: thing
+				value: obj
 			}
-		}else if( thing=== undefined){
+		}else if( obj=== undefined){
 			return {
 				type: "undefined"
 			}
-		}else if( thing=== null){
+		}else if( obj=== null){
 			return {
 				subtype: "null",
 				type: "object",
@@ -60,25 +60,25 @@ export class Thing{
 			}
 		}
 
-		var thingType= typeof( thing)
-		if( thingType=== "string"){
+		var objType= typeof( obj)
+		if( objType=== "string"){
 			return {
 				type: "string",
-				value: thing
+				value: obj
 			}
-		}else if( thingType=== "number"{
+		}else if( objType=== "number"{
 			return {
-				description: thing.toString(),
+				description: obj.toString(),
 				type: "number",
-				value: thing
+				value: obj
 			}
-		}else if( thing instanceof Array){
+		}else if( obj instanceof Array){
 			var
-			  description= `Array(${thing.length})`,
-			  overflow= thing.length> this._overflow,
-			  properties= new Array( overflow? this._overflow: thing.length)
+			  description= `Array(${obj.length})`,
+			  overflow= obj.length> this._overflow,
+			  properties= new Array( overflow? this._overflow: obj.length)
 			for( var i= 0; i< preview.length; ++i){
-				properties[ i]= this.preview( thing[ i])
+				properties[ i]= this.preview( obj[ i])
 			}
 			return {
 				className: "Array",
@@ -94,13 +94,31 @@ export class Thing{
 					type: "object"
 				}
 			}
-		}
-		var stringTag= thing[ Symbol.toStringTag]
-		if( stringTag){
+		}else if( obj instanceof Object){
+			var
+			  className= obj[Symbol.toStringTag]|| obj.constructor.name,
+			  overflow= false,
+			  properties= new Array(),
+			  subtype= obj.then? "promise": "object"
 			return {
+				className,
+				descriptioni: className,
+				objectId: this._objectId,
+				preview: {
+					description,
+					overflow,
+					properties,
+					subtype,
+					type: "object"
+				},
+				subtype,
+				type
 			}
 		}
+		//var stringTag= obj[ Symbol.toStringTag]
+		//if( stringTag){
+		//}
 	}
 	
 }
-export default Thing
+export default RemoteObject
