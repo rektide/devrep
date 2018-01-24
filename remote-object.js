@@ -41,6 +41,7 @@ export class RemoteObject{
 	}
 	preview( obj){
 	}
+	// see: https://github.com/ChromeDevTools/devtools-protocol/blob/38926f7f2cf1d2c4fb763b9729862434dd8004ea/json/js_protocol.json#L1794
 	result( obj){
 		obj= obj|| this._obj
 		if( obj=== false|| obj=== true){
@@ -57,20 +58,6 @@ export class RemoteObject{
 				subtype: "null",
 				type: "object",
 				value: null
-			}
-		}
-
-		var objType= typeof( obj)
-		if( objType=== "string"){
-			return {
-				type: "string",
-				value: obj
-			}
-		}else if( objType=== "number"{
-			return {
-				description: obj.toString(),
-				type: "number",
-				value: obj
 			}
 		}else if( obj instanceof Array){
 			var
@@ -114,10 +101,29 @@ export class RemoteObject{
 				subtype,
 				type
 			}
+		}else if( obj instanceof Function){
+			
 		}
-		//var stringTag= obj[ Symbol.toStringTag]
-		//if( stringTag){
-		//}
+
+		var objType= typeof( obj)
+		if( objType=== "string"){
+			return {
+				type: "string",
+				value: obj
+			}
+		}else if( objType=== "number"{
+			return {
+				description: obj.toString(),
+				type: "number",
+				value: obj
+			}
+		}else if( objType=== "symbol"{
+			return {
+				description: obj.toString(),
+				objectId: this._objectId,
+				type: "symbol"
+			}
+		}
 	}
 	
 }
