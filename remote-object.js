@@ -27,9 +27,6 @@
 var counter= 1
 
 export var defaults= {
-	objectId: function(){
-		return ++counter
-	}
 } 
 
 /**
@@ -83,12 +80,11 @@ export class RemoteObject{
 	}
 	constructor( obj, opts= defaults){
 		this._obj= obj
-		this._objectId= opts.objectId()
-		this._injectedScriptId= opts.injectedScriptId|| 1
-		this._overflow= 99
+		this._injectedScriptId= opts.injectedScriptId|| 1 // does this need to be per connection? is it genuinely used anywhere?
+		this._overflowThreshold= 99
 	}
 	// see: https://github.com/ChromeDevTools/devtools-protocol/blob/38926f7f2cf1d2c4fb763b9729862434dd8004ea/json/js_protocol.json#L1794
-	result( obj){
+	result( obj, conn){
 		obj= obj|| this._obj
 		if( obj=== false|| obj=== true){
 			return {
@@ -114,7 +110,7 @@ export class RemoteObject{
 		}else if( obj instanceof Array){
 			var
 			  description= `Array(${obj.length})`,
-			  overflow= obj.length> this._overflow,
+			  overflow= obj.length> this._overflowThreshold,
 			  properties= new Array( overflow? this._overflow: obj.length)
 			for( var i= 0; i< preview.length; ++i){
 				properties[ i]= this.preview( obj[ i])
@@ -144,8 +140,8 @@ export class RemoteObject{
 			return {
 				result: {
 					className,
-					descriptioni: className,
-					objectId: this._objectId,
+					description: className,
+					objectId: conn.objectId( obj)
 					preview: {
 						description,
 						overflow,
@@ -159,8 +155,11 @@ export class RemoteObject{
 			}
 		}else if( obj instanceof Function){
 			return {
-				internalProperties: [],
 				result: {
+					className: "Function",
+					description: obj.toString(),
+					objectId: conn.objectId( obj),
+					type: "function"
 				}
 			}
 		}
@@ -185,7 +184,7 @@ export class RemoteObject{
 			return {
 				result: {
 					description: obj.toString(),
-					objectId: this._objectId,
+					objectId: conn.objectId( obj)
 					type: "symbol"
 				}
 			}

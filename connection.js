@@ -7,14 +7,49 @@ export class Connection{
 	constructor( conn, target){
 		this._target= target
 		this._conn= conn
-		this._enable= {} // start with no features enabled
+
+		this._enable= {} // a connection is supposed to "enable" features it wants. save which here.
+
+		// object storage - a connection carries state about RemoteObjects it has sent
+		var _id= 0
+		this._genObjectId= function(){
+			return ++_id
+		}
+		this._obj2Id= new WeakMap() // map from object to their id
+		this._id2Obj= {} // map from id to object -- warning, not weak! yikes.
+
 		this.onmessage= this.onmessage.bind( this)
 		this.onconsole= this.onconsole.bind( this)
 	}
+	/**
+	  Send this object to the debugger
+	*/
 	send( o){
 		this._conn.send( JSON.stringify( o))
 	}
-	onconsole(){
+	/**
+	  Retrieve an id for an object
+	  If you do not have an id, one will be created for you & you will be tracked by it
+	*/
+	objectId( obj){
+		var existing= this._obj2Id.get( obj)
+		if( existing){
+			return existing
+		}
+
+		var newId= this.genObjectId()
+		this._obj2Id.set( obj, newId)
+		this._id2Obj[ newId]= obj
+		return newId
+	}
+	/**
+	  Lookup an object from an id
+	*/
+	getObject( id){
+		return this._id2Obj[ id]
+	}
+	onconsole(...args){
+		console.log("onconsole", args) // placeholder impl
 	}
 	onmessage( msg){
 		msg= JSON.parse( msg)
@@ -73,7 +108,7 @@ export class Connection{
 				// 1. we need to save the result by an id we can lookup again- the initial view is just a "preview"
 				// 2. theres a sizable complexity to how types seem to be marshalled- strings, objects, numbers, Promises, &c
 				var
-				  r1= Vm.runInContext( params.expression, this._target._vm),
+				  raw= Vm.runInContext( params.expression, this._target._vm),
 				  namer= name=> ({ name, type: "Object", value: "Object"}),
 				  r2 = Object.keys( r1).map( namer) // "it's complicated", much todo
 				result.result= {
