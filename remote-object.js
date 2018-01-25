@@ -32,17 +32,60 @@ export var defaults= {
 	}
 } 
 
+/**
+  In DevTools Protocol, the server (us) sends "RemoteObject"s to the client.
+  This class helps serialize normal objects into RemoteObjects.
+*/
 export class RemoteObject{
+	static get subtype( o){
+		if( o instanceof Array){
+			return "array"
+		}
+		if( o=== null){
+			return "null"
+		}
+		if( o instanceof RegExp){
+			return "regexp"
+		}
+		if( o instanceof Date){
+			return "date"
+		}
+		if( o instanceof Map){
+			return "map"
+		}
+		if( o instanceof Set){
+			return "set"
+		}
+		if( o instanceof WeakMap){
+			return "weakmap"
+		}
+		if( o instanceof WeakSet){
+			return "weakset"
+		}
+		if( o.next){ // this test is garbage
+			return "iterator"
+		}
+		if( o instanceof Error){
+			return "error"
+		}
+		if( o instanceof Proxy){
+			return "proxy"
+		}
+		if( o instanceof Promise){
+			return "promise"
+		}
+		if( o instanceof TypedArray){
+			return "typedarray"
+		}
+		if( typeof Node!== "undefined"&& o instanceof Node){
+			return "node"
+		}
+	}
 	constructor( obj, opts= defaults){
 		this._obj= obj
 		this._objectId= opts.objectId()
 		this._injectedScriptId= opts.injectedScriptId|| 1
 		this._overflow= 99
-	}
-	preview( obj){
-	}
-	static get subtype( o){
-		
 	}
 	// see: https://github.com/ChromeDevTools/devtools-protocol/blob/38926f7f2cf1d2c4fb763b9729862434dd8004ea/json/js_protocol.json#L1794
 	result( obj){
@@ -97,7 +140,7 @@ export class RemoteObject{
 			  className= obj[Symbol.toStringTag]|| obj.constructor.name,
 			  overflow= false,
 			  properties= new Array(),
-			  subtype= obj.then? "promise": "object"
+			  subtype= RemoteObject.subtype( obj)
 			return {
 				result: {
 					className,
@@ -148,6 +191,7 @@ export class RemoteObject{
 			}
 		}
 	}
-	
+	preview( obj){
+	}
 }
 export default RemoteObject
