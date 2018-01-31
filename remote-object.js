@@ -192,7 +192,14 @@ export class RemoteObject{
 	}
 	preview(){
 	}
-	properties(){
+	properties( params, conn, returnValue){
+		returnValue= returnValue|| {}
+		var descriptors= Object.getOwnPropertyDescriptors( this._obj)
+		for( var name in descriptors){
+			var descriptor= descriptors[ name]
+		}
+		returnValue.properties= properties
+		return returnValue
 	}
 }
 export default RemoteObject

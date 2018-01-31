@@ -109,13 +109,15 @@ export class Connection{
 				// 1. we need to save the result by an id we can lookup again- the initial view is just a "preview"
 				// 2. theres a sizable complexity to how types seem to be marshalled- strings, objects, numbers, Promises, &c
 				var
+				  // TODO: try -> error -> wasThrown
 				  val= Vm.runInContext( params.expression, this._target._vm),
 				  remoteObject= new RemoteObject( val),
-				  result.result= remoteObject.result( conn)
+				  result.result= remoteObject.result( this)
 			}else if( call=== "getProperties"){
 				var
 				  objId= params.objectId,
-				  obj= this._id2Obj[ objId],
+				  obj= this._id2Obj[ objId]
+				result= obj.properties( params, this)
 				// need to dive further into an existing result
 			}else if( call=== "discardConsoleEntries"){
 				// forget all
