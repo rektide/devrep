@@ -1,4 +1,5 @@
 import * as Vm from "vm"
+import RemoteObject from "./remote-object.js"
 
 /**
 * A websocket 
@@ -108,22 +109,13 @@ export class Connection{
 				// 1. we need to save the result by an id we can lookup again- the initial view is just a "preview"
 				// 2. theres a sizable complexity to how types seem to be marshalled- strings, objects, numbers, Promises, &c
 				var
-				  raw= Vm.runInContext( params.expression, this._target._vm),
-				  namer= name=> ({ name, type: "Object", value: "Object"}),
-				  r2 = Object.keys( r1).map( namer) // "it's complicated", much todo
-				result.result= {
-					className: "Object",
-					description: "Object",
-					objectId: `{"injectedScriptId": 1, "id": 1}`,
-					preview: {
-						description: "Object",
-						overflow: false,
-						properties: r2,
-						type: "object"
-					},
-					type: "object"
-				}
+				  val= Vm.runInContext( params.expression, this._target._vm),
+				  remoteObject= new RemoteObject( val),
+				  result.result= remoteObject.result( conn)
 			}else if( call=== "getProperties"){
+				var
+				  objId= params.objectId,
+				  obj= this._id2Obj[ objId],
 				// need to dive further into an existing result
 			}else if( call=== "discardConsoleEntries"){
 				// forget all

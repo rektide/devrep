@@ -84,7 +84,7 @@ export class RemoteObject{
 		this._overflowThreshold= 99
 	}
 	// see: https://github.com/ChromeDevTools/devtools-protocol/blob/38926f7f2cf1d2c4fb763b9729862434dd8004ea/json/js_protocol.json#L1794
-	result( obj, conn){
+	result(){
 		obj= obj|| this._obj
 		if( obj=== false|| obj=== true){
 			return {
@@ -119,7 +119,7 @@ export class RemoteObject{
 				result: {
 					className: "Array",
 					description,
-					objectId: this._objectId,
+					objectId: conn.objectId( obj),
 					subtype: "array",
 					type: "object",
 					preview: {
@@ -190,7 +190,9 @@ export class RemoteObject{
 			}
 		}
 	}
-	preview( obj){
+	preview(){
+	}
+	properties(){
 	}
 }
 export default RemoteObject
