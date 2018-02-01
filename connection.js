@@ -111,8 +111,8 @@ export class Connection{
 				var
 				  // TODO: try -> error -> wasThrown
 				  val= Vm.runInContext( params.expression, this._target._vm),
-				  remoteObject= new RemoteObject( val),
-				  result.result= remoteObject.result( this)
+				  remoteObject= new RemoteObject( val)
+				result.result= remoteObject.result( this)
 			}else if( call=== "getProperties"){
 				var
 				  objId= params.objectId,

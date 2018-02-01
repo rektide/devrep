@@ -24,9 +24,8 @@
 			}}}}
 */
 
-var counter= 1
-
-export var defaults= {
+export let defaults= {
+	overflowThreshold: 32
 } 
 
 /**
@@ -34,7 +33,7 @@ export var defaults= {
   This class helps serialize normal objects into RemoteObjects.
 */
 export class RemoteObject{
-	static get subtype( o){
+	static subtype( o){
 		if( o instanceof Array){
 			return "array"
 		}
@@ -78,10 +77,11 @@ export class RemoteObject{
 			return "node"
 		}
 	}
-	constructor( obj, opts= defaults){
+	constructor( obj, conn, opts= defaults){
 		this._obj= obj
+		this._conn= conn
 		this._injectedScriptId= opts.injectedScriptId|| 1 // does this need to be per connection? is it genuinely used anywhere?
-		this._overflowThreshold= 99
+		this._overflowThreshold= opts.overflowThreshold|| defaults.overflowThreshold
 	}
 	// see: https://github.com/ChromeDevTools/devtools-protocol/blob/38926f7f2cf1d2c4fb763b9729862434dd8004ea/json/js_protocol.json#L1794
 	result(){
@@ -141,7 +141,7 @@ export class RemoteObject{
 				result: {
 					className,
 					description: className,
-					objectId: conn.objectId( obj)
+					objectId: conn.objectId( obj),
 					preview: {
 						description,
 						overflow,
@@ -172,7 +172,7 @@ export class RemoteObject{
 					value: obj
 				}
 			}
-		}else if( objType=== "number"{
+		}else if( objType=== "number"){
 			return {
 				result: {
 					description: obj.toString(),
@@ -180,11 +180,11 @@ export class RemoteObject{
 					value: obj
 				}
 			}
-		}else if( objType=== "symbol"{
+		}else if( objType=== "symbol"){
 			return {
 				result: {
 					description: obj.toString(),
-					objectId: conn.objectId( obj)
+					objectId: conn.objectId( obj),
 					type: "symbol"
 				}
 			}
@@ -192,12 +192,35 @@ export class RemoteObject{
 	}
 	preview(){
 	}
-	properties( params, conn, returnValue){
-		returnValue= returnValue|| {}
-		var descriptors= Object.getOwnPropertyDescriptors( this._obj)
-		for( var name in descriptors){
-			var descriptor= descriptors[ name]
-		}
+	properties( params, conn){
+		var
+		  obj= this._obj,
+		  result= [],
+		  loop= !params.ownProperties,
+		  isOwn= true
+		do{
+			var descriptors= Object.getOwnPropertyDescriptors( obj)
+			for( var name in descriptors){
+				var descriptor= descriptors[ name]
+				if( param.accessorPropertiesOnly&& !descriptor.get&& !descriptor.set){
+					continue
+				}
+				if( descriptor.get){
+					var get= new RemoteObject( descriptor.get, conn)
+					descriptor.get= get.result()
+				}
+				if( descriptor.set){
+					var set= new RemoteObject( descriptor.set, conn)
+					descriptor.set= set.result()
+				}
+				descriptor.isOwn= true
+				result.push( descriptor)
+			}
+			if( loop){
+				obj= loop= Object.getPrototypeOf( obj)
+				isOwn= false
+			}
+		}while( loop)
 		returnValue.properties= properties
 		return returnValue
 	}
